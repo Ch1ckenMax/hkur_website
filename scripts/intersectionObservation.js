@@ -67,27 +67,33 @@ let introductionTextFadeObserver = introductionTextFade.generateObservation((ent
 )
 
 //text fade in transitions from the left
-let transitionLeftIn = new IntersectionObservation('.transition_in_left', 0.1);
-let transitionleftInObserver = transitionLeftIn.generateObservation((entry) => {
+let transitionLeft = new IntersectionObservation('.transition_left', 0.1);
+let transitionleftObserver = transitionLeft.generateObservation((entry) => {
         entry.target.childNodes[1].classList.remove('invisible','animate__fadeOutLeft'); //animation makes the element moves around so need to wrap it inside another div to make the intersection observation consistent
-        entry.target.childNodes[1].classList.add('animate__fadeInLeft');}, 
-    (entry) => {
-    }
-);
-
-//text fade out transitions from the left
-let transitionLeftOut = new IntersectionObservation('.transition_out_left', 0.3);
-let transitionleftOutObserver = transitionLeftOut.generateObservation((entry) => {},
-    (entry) => {
+        entry.target.childNodes[1].classList.add('animate__fadeInLeft');
+}, (entry) => {
         entry.target.childNodes[1].classList.remove('animate__fadeInLeft');
         entry.target.childNodes[1].classList.add('animate__fadeOutLeft');
     }
 );
 
 //text fade in transitions from the right
-let transitionRightIn = new IntersectionObservation('.transition_in_right', 0.1);
+let transitionRightIn = new IntersectionObservation('.transition_right', 0.1);
 let transitionRightInObserver = transitionRightIn.generateObservation((entry) => {
         entry.target.childNodes[1].classList.remove('invisible','animate__fadeOutRight');
-        entry.target.childNodes[1].classList.add('animate__fadeInRight');}, 
-    (entry) => {}
+        entry.target.childNodes[1].classList.add('animate__fadeInRight');
+}, (entry) => {
+        entry.target.childNodes[1].classList.remove('animate__fadeInRight');
+        entry.target.childNodes[1].classList.add('animate__fadeOutRight');
+    }
+);
+
+//default text for division descriptions
+let divDescription = new IntersectionObservation('#division-description',0.1);
+let divDescriptionObserver = divDescription.generateObservation((entry) => {
+    document.getElementById("division-name").innerHTML = divisionDescription['default'][0];
+    document.getElementById("division-description").innerHTML = divisionDescription['default'][1];
+}, (entry) => {
+
+}
 );
