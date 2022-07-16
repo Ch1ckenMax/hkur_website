@@ -5,34 +5,67 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <title>Test</title>
 </head>
-<body class="h-full text-white">
-    <nav class="flex justify-between font-bold p-4 bg-black/70 sticky top-0">
-        <div class="text-3xl">
-            <a href="#"><img src="../public/hkurlogo.png" class="h-24"></a>
-        </div>
-        <div class="flex text-m items-center">
-            <a href="#" class="px-2 hover:text-[#23A455] hover:transition">About</a>
-            <a href="#" class="px-2 hover:text-[#23A455] hover:transition">Sponsors</a>
-            <a href="#" class="px-2 hover:text-[#23A455] hover:transition">Contact</a>
+<body class="h-full text-white bg-[#1f2937]">
+    <nav class="bg-black/70 fixed w-screen">
+        <div class="flex justify-between font-bold px-8 2xl:max-w-[1536px] mx-auto">
+            <div class="text-3xl">
+                <a href="#"><img src="../public/hkurlogo.png" class="h-24"></a>
+            </div>
+            <div class="flex text-m items-center">
+                <a href="#" class="px-2 hover:text-[#23A455] hover:transition">About</a>
+                <a href="#" class="px-2 hover:text-[#23A455] hover:transition">Sponsors</a>
+                <a href="#" class="px-2 hover:text-[#23A455] hover:transition">Contact</a>
+            </div>
         </div>
     </nav>
 
-    <div class="bg-[url('../public/car.jpeg')] h-screen bg-center bg-no-repeat bg-cover flex flex-col justify-between">
-        <div class="flex m-4">
-            <div class="text-3xl font-bold flex-1 m-4 p-4">
+    <div class="h-screen flex flex-col justify-between 2xl:max-w-[1536px] mx-auto">
+        <div class="grow mt-[96px]">
+            
+        </div>
+
+        <div class="flex m-4 mb-[5%] overflow-x-hidden">
+            <div class="text-3xl font-bold flex-1 m-4 p-4 animate__animated animate__fadeInLeft">
                 We design a formula-style race car to compete in the Formula Student UK
             </div>
 
-            <div class="flex-1 m-4 p-4">
+            <div class="flex-1 m-4 p-4 animate__animated animate__fadeInRight">
                 Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quod accusamus fugit eveniet deleniti voluptates, doloremque culpa distinctio dignissimos explicabo est. Provident quod exercitationem sit, facere ipsum ipsa accusamus eaque! Blanditiis laborum dignissimos ipsa recusandae at fuga, maiores beatae nobis nisi a dicta nostrum dolorem doloribus nemo quam impedit assumenda aliquid.
             </div>
         </div>
     </div>
 
-    <div class="bg-[url('../public/car2.jpg')] h-screen bg-center bg-no-repeat bg-cover flex flex-col justify-between">
+    <div class="h-screen flex flex-col justify-between 2xl:max-w-[1536px] mx-auto mt-[96-px]">
+        <div class="m-8 p-4 mt-[10%] text-4xl font-bold flex-1 invisible transition_left overflow-x-hidden">
+            Our Divisions:
+        </div>
+
+        <div class="">
+        </div>
+
+        <div class="flex m-4 mb-[5%] overflow-x-hidden">
+            <div class="text-3xl font-bold flex-1 m-4 p-4 transition_left">
+                Blah Blah Blah Division
+            </div>
+            <div class="flex-1 m-4 p-4 transition_right">
+                Click the car components to see the introduction of our each divisions.
+            </div>
+        </div>
     </div>
+
+    <footer class="flex-col bg-[#003216]">
+        <div class="flex justify-center">
+            <a href="#" class="mx-3 my-7 hover:text-[#23A455] hover:transition">IG</a>
+            <a href="#" class="mx-3 my-7 hover:text-[#23A455] hover:transition">FB</a>
+            <a href="#" class="mx-3 my-7 hover:text-[#23A455] hover:transition">YT</a>
+        </div>
+        <div class="flex justify-center py-2">Copyright @ hahafunny placeholder text</div>
+    </footer>
     
+
+    <script src="scrollAnimation.js"></script>
 </body>
 </html>
