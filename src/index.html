@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <title>Test</title>
 </head>
-<body class="h-full text-white bg-[#1f2937]">
-    <nav class="bg-black/70 fixed w-screen">
+<body class="h-full text-white bg-gradient-to-r from-[#1f2937] to-[#1B3F28]">
+    <nav class="fixed w-screen bg-black transition-all"> <!--bg color set in scroll animation scripts-->
         <div class="flex justify-between font-bold px-8 2xl:max-w-[1536px] mx-auto">
             <div class="text-3xl">
                 <a href="#"><img src="../public/hkurlogo.png" class="h-24"></a>
@@ -23,40 +23,45 @@
     </nav>
 
     <div class="h-screen flex flex-col justify-between 2xl:max-w-[1536px] mx-auto">
-        <div class="grow mt-[96px]">
+        <div class="grow mt-[96px] nav_target">
             
         </div>
 
         <div class="flex m-4 mb-[5%] overflow-x-hidden">
-            <div class="text-3xl font-bold flex-1 m-4 p-4 animate__animated animate__fadeInLeft">
+            <div id="introleft" class="text-3xl font-bold flex-1 m-4 p-4 animate__animated animate__fadeInLeft">
                 We design a formula-style race car to compete in the Formula Student UK
             </div>
 
-            <div class="flex-1 m-4 p-4 animate__animated animate__fadeInRight">
+            <div id="introright" class="flex-1 m-4 p-4 animate__animated animate__fadeInRight">
                 Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quod accusamus fugit eveniet deleniti voluptates, doloremque culpa distinctio dignissimos explicabo est. Provident quod exercitationem sit, facere ipsum ipsa accusamus eaque! Blanditiis laborum dignissimos ipsa recusandae at fuga, maiores beatae nobis nisi a dicta nostrum dolorem doloribus nemo quam impedit assumenda aliquid.
             </div>
         </div>
     </div>
 
-    <div class="h-screen flex flex-col justify-between 2xl:max-w-[1536px] mx-auto mt-[96-px]">
-        <div class="m-8 p-4 mt-[10%] text-4xl font-bold flex-1 invisible transition_left overflow-x-hidden">
-            Our Divisions:
+    <div class="h-screen flex flex-col justify-between 2xl:max-w-[1536px] mx-auto mt-[96-px] introduction_target">
+        <div class="m-8 p-4 mt-[10%] text-4xl font-bold flex-1 transition_in_left transition_out_left overflow-x-hidden">
+            <div class="invisible animate__animated">Our Divisions:</div>
         </div>
 
         <div class="">
         </div>
 
         <div class="flex m-4 mb-[5%] overflow-x-hidden">
-            <div class="text-3xl font-bold flex-1 m-4 p-4 transition_left">
-                Blah Blah Blah Division
+            <div class="text-3xl font-bold flex-1 m-4 p-4 transition_in_left">
+                <div class="invisible animate__animated">Blah Blah Blah Division</div>
             </div>
-            <div class="flex-1 m-4 p-4 transition_right">
-                Click the car components to see the introduction of our each divisions.
+            <div class="flex-1 m-4 p-4 transition_in_right">
+                <div class="invisible animate__animated">Click the car components to see the introduction of our each divisions.</div>
             </div>
         </div>
     </div>
 
-    <footer class="flex-col bg-[#003216]">
+    <div class="h-screen flex flex-col justify-between 2xl:max-w-[1536px] mx-auto">
+
+    </div>
+
+
+    <footer class="flex-col bg-[rgba(0,0,0,0.9)]">
         <div class="flex justify-center">
             <a href="#" class="mx-3 my-7 hover:text-[#23A455] hover:transition">IG</a>
             <a href="#" class="mx-3 my-7 hover:text-[#23A455] hover:transition">FB</a>
