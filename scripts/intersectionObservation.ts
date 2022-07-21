@@ -94,8 +94,8 @@ let transitionRightInObserver = transitionRightIn.generateObservation((entry:any
 //default text for division descriptions
 let divDescription = new IntersectionObservation('#division-description',0.1);
 let divDescriptionObserver = divDescription.generateObservation((entry:any) => {
-    document.getElementById("division-name")!.innerHTML = divisionDescription['default'][0];
-    document.getElementById("division-description")!.innerHTML = divisionDescription['default'][1];
+    document.getElementById("division-name")!.innerHTML = divisionDescription['default'][0] as string;
+    document.getElementById("division-description")!.innerHTML = divisionDescription['default'][1] as string;
 }, (entry:any) => {
 
 }
