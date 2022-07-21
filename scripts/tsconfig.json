@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+      "noImplicitAny": true,
+      "removeComments": true,
+      "preserveConstEnums": true,
+      "target": "es2020",
+      "outDir": "bin",
+      "outFile": "./bin/scripts.js"
+    },
+    "include": ["./*.ts"]
+    
+  }
