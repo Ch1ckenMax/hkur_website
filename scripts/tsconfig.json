@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+      "noImplicitAny": true,
+      "removeComments": true,
+      "preserveConstEnums": true,
+      "allowJs": true,
+      "resolveJsonModule": true,
+      "moduleResolution": "node",
+      "module": "es6",
+      "target": "es5",
+      "outDir": "./bin/",
+    },
+    "include": ["./*.ts"]
+    
+}

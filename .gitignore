@@ -1,0 +1,11 @@
+scripts/node_modules/*
+!scripts/node_modules/three
+scripts/node_modules/three/*
+!scripts/node_modules/three/examples
+scripts/node_modules/three/examples/*
+!scripts/node_modules/three/examples/js
+scripts/node_modules/three/examples/js/*
+!scripts/node_modules/three/examples/js/libs
+scripts/node_modules/three/examples/js/libs/*
+!scripts/node_modules/three/examples/js/libs/draco
+images/hkur_01_compressed.glb

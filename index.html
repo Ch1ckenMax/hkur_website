@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://kit.fontawesome.com/21268f1a5b.js" crossorigin="anonymous"></script>
+    <title>Test</title>
+</head>
+<body class="h-full text-white bg-gradient-to-r from-[#1f2937] to-[#1B3F28] overflow-x-hidden">
+    <div id="loading_screen" class="h-screen w-screen fixed bg-[rgba(0,0,0,0.9)] z-20 flex items-center justify-center">
+        <div id="loading_message" class="text-3xl md:text-5xl font-bold">Loading...</div>
+    </div>
+
+    <nav class="fixed w-screen bg-black transition-all"> <!--bg color set in scroll animation scripts-->
+        <div class="flex justify-between font-bold px-8 2xl:max-w-[1536px] mx-auto">
+            <div class="text-xl">
+                <a href="#" class="flex flex-row items-center hover:text-[#23A455] hover:transition">
+                    <img src="images/hkurlogo.png" class="h-12 md:h-20 mx-1">
+                    <div class="mx-1 invisible md:visible">HKU Racing</div>
+                </a>
+            </div>
+            <div class="flex text-m items-center">
+                <a href="#" class="px-2 hover:text-[#23A455] hover:transition">About</a>
+                <a href="#" class="px-2 hover:text-[#23A455] hover:transition">Sponsors</a>
+                <a href="#" class="px-2 hover:text-[#23A455] hover:transition">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <div id="intro" class="h-screen justify-end flex flex-col 2xl:max-w-[1536px] mx-auto">
+        <div id="intro_car" class="fixed top-0 mt-[156px]">
+            
+        </div>
+
+        <div id="intro_description" class="flex flex-col md:flex-row shrink-0 p-4 pb-[5%] overflow-x-hidden nav_target">
+            <div id="introleft" class="text-xl md:text-3xl font-bold flex-1 mx-4 my-3 m-4 md:p-4 animate__animated animate__fadeInLeft">
+                We design a formula-style race car to compete in the Formula Student UK
+            </div>
+
+            <div id="introright" class="flex-1 mx-4 my-3 m-4 md:p-4 animate__animated animate__fadeInRight">
+                Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quod accusamus fugit eveniet deleniti voluptates, doloremque culpa distinctio dignissimos explicabo est. Provident quod exercitationem sit, facere ipsum ipsa accusamus eaque! Blanditiis laborum dignissimos ipsa recusandae at fuga, maiores beatae nobis nisi a dicta nostrum dolorem doloribus nemo quam impedit assumenda aliquid.
+            </div>
+        </div>
+    </div>
+
+    <div class="h-screen flex flex-col justify-between 2xl:max-w-[1536px] mx-auto mt-[96-px] introduction_target">
+       <div class="m-8 p-4 mt-[10%] text-2xl md:text-4xl font-bold flex-1 transition_left overflow-x-hidden">
+            <div class="invisible animate__animated">Team Organization:</div>
+        </div>
+
+        <div id="division-car" class="absolute mt-[156px] z-0">
+
+        </div>
+
+        <div id="division-buttons" class="flex flex-col z-10">
+            <button id="chassis" type="button">Chassis</button>
+            <button id="sus" type="button">Suspension</button>
+            <button id="aero" type="button">Aero & Bodywork</button>
+            <button id="power" type="button">Powertrain</button>
+            <button id="input" type="button">Driving Input</button>
+            <button id="elec" type="button">Electrical</button>
+            <button id="sim" type="button">Sim-Racing</button>
+        </div>
+
+        <div class="flex flex-col md:flex-row m-4 mb-[10%] overflow-x-hidden">
+            <div class="text-xl md:text-3xl font-bold flex-1 mx-4 px-4 my-1 py-1 transition_left">
+                <div id="division-name" class="invisible animate__animated">left text test</div> <!--default text at intersectionObservation.ts script-->
+            </div>
+            <div class="flex-1 mx-4 px-4 my-1 py-1 transition_right">
+                <div id="division-description" class="invisible animate__animated">right text test bro u shouldnt see this</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="h-screen flex flex-col justify-between 2xl:max-w-[1536px] mx-auto">
+
+    </div>
+
+
+    <footer class="flex-col bg-[rgba(0,0,0,0.9)]">
+        <div class="flex justify-center">
+            <a href="#" class="mx-3 my-7 hover:text-[#23A455] hover:transition"><i class="fa-brands fa-instagram fa-2xl"></i></a>
+            <a href="#" class="mx-3 my-7 hover:text-[#23A455] hover:transition"><i class="fa-brands fa-square-facebook fa-2xl"></i></a>
+            <a href="#" class="mx-3 my-7 hover:text-[#23A455] hover:transition"><i class="fa-brands fa-twitter fa-2xl"></i></a>
+        </div>
+        <div class="flex justify-center py-2">Copyright @ 2022 HKU Racing</div>
+    </footer>
+    
+    <!--scripts-->
+    <script src="scripts/bin/scripts.js"></script>
+</body>
+</html>
