@@ -13,47 +13,60 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var three_examples_jsm_loaders_GLTFLoader_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three/examples/jsm/loaders/GLTFLoader.js */ "./node_modules/three/examples/jsm/loaders/GLTFLoader.js");
 /* harmony import */ var three_examples_jsm_loaders_DRACOLoader_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! three/examples/jsm/loaders/DRACOLoader.js */ "./node_modules/three/examples/jsm/loaders/DRACOLoader.js");
 /* harmony import */ var _intersectionObservation__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./intersectionObservation */ "./intersectionObservation.ts");
+var __extends = (undefined && undefined.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 
 
 
 
-var carCanvas = (function () {
-    function carCanvas() {
+var CanvasForAnimation = (function () {
+    function CanvasForAnimation(elementId) {
+        this.canvas = document.getElementById(elementId);
     }
-    carCanvas.getWidth = function () {
+    CanvasForAnimation.prototype.inViewport = function () {
+        return ((this.canvas.getBoundingClientRect().bottom > 0) && (window.innerHeight - this.canvas.getBoundingClientRect().top > 0));
+    };
+    return CanvasForAnimation;
+}());
+var CarCanvas = (function (_super) {
+    __extends(CarCanvas, _super);
+    function CarCanvas() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    CarCanvas.getWidth = function () {
         if (window.innerWidth > 1536)
             return 1536;
         else
             return window.innerWidth;
     };
-    carCanvas.getHeight = function () {
+    CarCanvas.getHeight = function () {
         return (window.innerHeight - document.getElementById('intro_description').scrollHeight - 96);
     };
-    carCanvas.introCarCanvas = document.getElementById("intro_car");
-    carCanvas.descriptionCanvas = document.getElementById('division-car');
-    return carCanvas;
-}());
-function canvasResize() {
-    camera.aspect = carCanvas.getWidth() / carCanvas.getHeight();
-    camera.updateProjectionMatrix();
-    renderer.setSize(carCanvas.getWidth(), carCanvas.getHeight());
-}
-function animate() {
-    var changeFactor = 1 - document.getElementById("intro").getBoundingClientRect().bottom / window.innerHeight;
-    if (changeFactor > 1)
-        changeFactor = 1;
-    var pos = [-2 + changeFactor * 2, 2, 2 - changeFactor * 0.25];
-    camera.position.set(pos[0], pos[1], pos[2]);
-    camera.lookAt(0, 0, 0);
-    renderer.render(scene, camera);
-    requestAnimationFrame(animate);
-}
+    return CarCanvas;
+}(CanvasForAnimation));
+var introCanvas = new CanvasForAnimation("intro");
+var introCarCanvas = new CarCanvas("intro_car");
+var divisionCanvas = new CanvasForAnimation("division");
+var divisionCarCanvas = new CarCanvas("division_car");
 var renderer = new three__WEBPACK_IMPORTED_MODULE_3__.WebGLRenderer({ alpha: true, antialias: true });
 renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize(carCanvas.getWidth(), carCanvas.getHeight());
-carCanvas.introCarCanvas.appendChild(renderer.domElement);
-carCanvas.descriptionCanvas.appendChild(renderer.domElement);
-var camera = new three__WEBPACK_IMPORTED_MODULE_3__.PerspectiveCamera(50, carCanvas.getWidth() / carCanvas.getHeight(), 0.1, 200000);
+renderer.setSize(CarCanvas.getWidth(), CarCanvas.getHeight());
+introCarCanvas.canvas.appendChild(renderer.domElement);
+divisionCarCanvas.canvas.appendChild(renderer.domElement);
+var camera = new three__WEBPACK_IMPORTED_MODULE_3__.PerspectiveCamera(50, CarCanvas.getWidth() / CarCanvas.getHeight(), 0.1, 200000);
 camera.position.set(-2, 2, 2);
 camera.lookAt(0, 0, 0);
 var scene = new three__WEBPACK_IMPORTED_MODULE_3__.Scene();
@@ -68,6 +81,7 @@ modelLoader.load("../images/hkur_01_compressed.glb", function (gltf) {
     console.log(gltf.scene);
     gltf.scene.rotateOnAxis(new three__WEBPACK_IMPORTED_MODULE_3__.Vector3(1, 0, 0), -Math.PI / 2);
     scene.add(gltf.scene);
+    animateScroll();
 }, undefined, function (error) {
     console.error(error);
 });
@@ -76,14 +90,49 @@ var light = new three__WEBPACK_IMPORTED_MODULE_3__.PointLight(0xffffff, 1, 16);
 light.position.set(-1.5, 1, 1);
 scene.add(ambientLight);
 scene.add(light);
-animate();
-window.addEventListener('resize', canvasResize, false);
+window.addEventListener('resize', function () { requestAnimationFrame(canvasResize); }, false);
+function canvasResize() {
+    camera.aspect = CarCanvas.getWidth() / CarCanvas.getHeight();
+    camera.updateProjectionMatrix();
+    renderer.setSize(CarCanvas.getWidth(), CarCanvas.getHeight());
+    renderer.render(scene, camera);
+}
 var canvasBehaviour = new _intersectionObservation__WEBPACK_IMPORTED_MODULE_2__.IntersectionObservation('#intro', 0);
 var canvasBehaviourBehaviourObserver = canvasBehaviour.generateObservation(function (entry) {
-    carCanvas.introCarCanvas.appendChild(renderer.domElement);
+    introCarCanvas.canvas.appendChild(renderer.domElement);
+    introCarCanvas.canvas.classList.add('fixed');
 }, function (entry) {
-    carCanvas.descriptionCanvas.appendChild(renderer.domElement);
+    divisionCarCanvas.canvas.appendChild(renderer.domElement);
+    introCarCanvas.canvas.classList.remove('fixed');
 });
+var scrolling = false;
+var lastScrolling = null;
+window.addEventListener('scroll', renderOnScroll, false);
+function renderOnScroll() {
+    if (!(introCanvas.inViewport() && divisionCanvas.inViewport()))
+        return;
+    lastScrolling = Date.now();
+    if (scrolling)
+        return;
+    requestAnimationFrame(animateScroll);
+    scrolling = true;
+}
+function animateScroll() {
+    var changeFactor = 1 - introCanvas.canvas.getBoundingClientRect().bottom / window.innerHeight;
+    if (changeFactor > 1)
+        changeFactor = 1;
+    var pos = [-2 + changeFactor * 2, 2, 2 - changeFactor * 0.25];
+    camera.position.set(pos[0], pos[1], pos[2]);
+    camera.lookAt(0, 0, 0);
+    renderer.render(scene, camera);
+    if (Date.now() - lastScrolling < 100) {
+        requestAnimationFrame(animateScroll);
+    }
+    else {
+        scrolling = false;
+        lastScrolling = null;
+    }
+}
 
 
 /***/ }),
@@ -241,7 +290,7 @@ var introductionTextFadeObserver = introductionTextFade.generateObservation(func
     introLeft.add('animate__fadeInLeft');
     introRight.add('animate__fadeInRight');
 });
-var transitionLeft = new IntersectionObservation('.transition_left', 1);
+var transitionLeft = new IntersectionObservation('.transition_left', 0.1);
 var transitionleftObserver = transitionLeft.generateObservation(function (entry) {
     entry.target.childNodes[1].classList.remove('invisible', 'animate__fadeOutLeft');
     entry.target.childNodes[1].classList.add('animate__fadeInLeft');
@@ -249,7 +298,7 @@ var transitionleftObserver = transitionLeft.generateObservation(function (entry)
     entry.target.childNodes[1].classList.remove('animate__fadeInLeft');
     entry.target.childNodes[1].classList.add('animate__fadeOutLeft');
 });
-var transitionRightIn = new IntersectionObservation('.transition_right', 1);
+var transitionRightIn = new IntersectionObservation('.transition_right', 0.1);
 var transitionRightInObserver = transitionRightIn.generateObservation(function (entry) {
     entry.target.childNodes[1].classList.remove('invisible', 'animate__fadeOutRight');
     entry.target.childNodes[1].classList.add('animate__fadeInRight');
@@ -257,7 +306,7 @@ var transitionRightInObserver = transitionRightIn.generateObservation(function (
     entry.target.childNodes[1].classList.remove('animate__fadeInRight');
     entry.target.childNodes[1].classList.add('animate__fadeOutRight');
 });
-var divDescription = new IntersectionObservation('#division-description', 0);
+var divDescription = new IntersectionObservation('#division-description', 0.1);
 var divDescriptionObserver = divDescription.generateObservation(function (entry) {
     document.getElementById("division-name").innerHTML = "Check out our HKUR-01 race car";
     document.getElementById("division-description").innerHTML = "Click the car components to see the introduction of our each divisions.";
