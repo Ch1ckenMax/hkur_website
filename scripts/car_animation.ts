@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
 import {IntersectionObservation} from './intersectionObservation';
+import {divisionDescription, divisionDescriptionChange} from './division_descriptions';
 //Canvas container
 class CanvasForAnimation{
     canvas: HTMLElement;
@@ -11,7 +12,7 @@ class CanvasForAnimation{
 
     //Returns true if and only if the canvas is intersecting with the viewport
     inViewport(): boolean{
-        return ((this.canvas.getBoundingClientRect().bottom > 0) && (window.innerHeight - this.canvas.getBoundingClientRect().top > 0))
+        return ((this.canvas.getBoundingClientRect().bottom > 0) && (window.innerHeight - this.canvas.getBoundingClientRect().top > 0));
     }
 }
 
@@ -64,7 +65,7 @@ modelLoader.load("../images/hkur_01_compressed.glb",function(gltf){
     console.log(gltf.scene);
     gltf.scene.rotateOnAxis(new THREE.Vector3(1,0,0), -Math.PI/2);
     scene.add(gltf.scene);
-    animateScroll();
+    animate();
 }, undefined, function(error) {
     console.error(error);
 });
@@ -105,22 +106,177 @@ function renderOnScroll(){
     if(!(introCanvas.inViewport() && divisionCanvas.inViewport())) return; //Not in scrolling area. Not rendering.
     lastScrolling = Date.now(); //Record the time of the latest scrolling event on scrolling area.
     if(scrolling) return; //already scrolling. do nothing.
-    requestAnimationFrame(animateScroll); //not scrolling, so start the animation loop
+    requestAnimationFrame(animate); //not scrolling, so start the animation loop
     scrolling = true;
 }
 
-//Changes camera position according to where the page is scrolled and renders
-function animateScroll(){
+//Helper class for picking car parts
+class PickHelper {
+    raycaster: THREE.Raycaster;
+    pickedDivision: string;
+    pickedDivisionMaterial: {[key: string]: any};
+    static partMapDivision:{[key: string]: string} = { //Maps the part's name property to each divisions
+        "accumulator_<1>":"power",
+        "aerodynamics_<1>":"aero",
+        "chassis_<1>":"chassis",
+        "electronics_<1>":"elec",
+        "FL_suspension_<1>":"sus",
+        "FR_suspension_<1>":"sus",
+        "RL_suspension_<1>":"sus",
+        "RR_suspension_<1>":"sus",
+        "steering_<1>":"input",
+        "pedal_box_<1>":"input",
+        "powertrain_<1>":"power",
+        "sim_<1>":""
+    };
+    static divisionMapPart:{[key: string]: string[]} = { //Maps each division to an array of parts name
+        "power":["accumulator_<1>","powertrain_<1>"],
+        "aero":["aerodynamics_<1>"],
+        "chassis":["chassis_<1>"],
+        "elec":["electronics_<1>"],
+        "sus":["FL_suspension_<1>","FR_suspension_<1>","RL_suspension_<1>","RR_suspension_<1>"],
+        "input":["steering_<1>","pedal_box_<1>"],
+        "sim":[""],
+    };
+
+    constructor() {
+      this.raycaster = new THREE.Raycaster();
+      this.pickedDivision = null;
+      this.pickedDivisionMaterial = {};
+    }
+
+    //Makes the car parts that belongs to the division selected by the cursor emissive in red. Returns the name of the division being chosen.
+    pick(normalizedPosition: {x: number,y: number}, scene: THREE.Scene, camera: THREE.Camera): void{
+        if(this.pickedDivision != null){ //Removes the emissive color of the car parts in the previously selected division
+            this.restoreDivisionMaterial();
+            this.pickedDivision = null;
+            this.pickedDivisionMaterial = {} as {[key: string]: THREE.Material};
+        }
+        this.raycaster.setFromCamera(normalizedPosition, camera);
+        const intersectedObjects = this.raycaster.intersectObjects(scene.children);
+        if (intersectedObjects.length){ //If there is any intersection with any object
+            this.pickedDivision = PickHelper.partMapDivision[PickHelper.getCarPart(intersectedObjects[0].object).name]; //Get the division name of the first object intersected
+            this.paintDivisionEmissive(0x006600);
+        }
+    }
+
+    //Get the reference to the car part that contains the component from the argument
+    static getCarPart(component: THREE.Object3D): THREE.Object3D{
+        while(component.parent.name != "HKUR01"){
+            component = component.parent;
+        }
+        return component;
+    }
+
+    //Paint all the car part belong to the picked division to the emissive color of the argument
+    paintDivisionEmissive(emissiveColor: number): void{
+        PickHelper.divisionMapPart[this.pickedDivision].forEach((element:string) => {
+            this.changeEmissiveOfCarPart(scene.getObjectByName(element), emissiveColor);
+        });
+    }
+
+    //Set all the descendent mesh of the car part to have emissive material, in which the emissive color is specified in the argument. Recursive.
+    changeEmissiveOfCarPart(carPart: THREE.Object3D, emissiveColor: number): void{
+        carPart.children.forEach((element: any) => {
+            if(element.isMesh){
+                this.pickedDivisionMaterial[element.name] = element.material;//save the material for restoration later
+                element.material = element.material.clone(); //Since multiple mesh can reference to the same material, clone another one to avoid changing the wrong material
+                element.material.emissive.setHex(emissiveColor);
+            }
+            else{
+                this.changeEmissiveOfCarPart(element, emissiveColor);
+            }
+        });
+    }
+
+    //Restore all the car part belong to the picked division to the original material
+    restoreDivisionMaterial(): void{
+        PickHelper.divisionMapPart[this.pickedDivision].forEach((element:string) => {
+            this.restoreCarPartMaterial(scene.getObjectByName(element));
+        });
+    }
+
+    //Restore all the descendent mesh of the car part to the original material. Recursive.
+    restoreCarPartMaterial(carPart: THREE.Object3D): void{
+        carPart.children.forEach((element: any) => {
+            if(element.isMesh){
+                element.material = this.pickedDivisionMaterial[element.name];
+            }
+            else{
+                this.restoreCarPartMaterial(element);
+            }
+        });
+    }
+
+  }
+
+const pickHelper = new PickHelper();
+
+//Cursor position
+const pickPosition = {x: 0, y: 0};
+clearPickPosition();
+
+//Relative position of the cursor to the canvas
+function getCanvasRelativePosition(event: MouseEvent) {
+    let rect: DOMRect;
+    if(introCarCanvas.inViewport()){
+        rect = introCarCanvas.canvas.getBoundingClientRect();
+    }
+    else if(divisionCarCanvas.inViewport()){
+        rect = divisionCarCanvas.canvas.getBoundingClientRect();
+    }
+    return {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    };
+  }
+
+function setPickPosition(event: MouseEvent) {
+    let pos = getCanvasRelativePosition(event);
+    pickPosition.x = (pos.x / CarCanvas.getWidth()) *  2 - 1;
+    pickPosition.y = (pos.y / CarCanvas.getHeight()) * -2 + 1;  // note we flip Y
+    if(!scrolling){
+        requestAnimationFrame(animate);
+    }
+}
+ 
+function clearPickPosition() {
+    //Set it to invalid positions
+    pickPosition.x = -100000;
+    pickPosition.y = -100000;
+}
+
+//Change the division description based on what car part is clicked
+function changeDivisionBasedOnClick(): void{
+    if(pickHelper.pickedDivision != null){
+        console.log("Picked "+pickHelper.pickedDivision);
+        divisionDescriptionChange(pickHelper.pickedDivision);
+    }
+}
+
+//Car model reaction to mouse actions
+introCarCanvas.canvas.addEventListener('mousemove', setPickPosition);
+introCarCanvas.canvas.addEventListener('mouseout', clearPickPosition);
+introCarCanvas.canvas.addEventListener('mouseleave', clearPickPosition);
+introCarCanvas.canvas.addEventListener('click', changeDivisionBasedOnClick);
+divisionCarCanvas.canvas.addEventListener('mousemove', setPickPosition);
+divisionCarCanvas.canvas.addEventListener('mouseout', clearPickPosition);
+divisionCarCanvas.canvas.addEventListener('mouseleave', clearPickPosition);
+divisionCarCanvas.canvas.addEventListener('click', changeDivisionBasedOnClick);
+
+//Changes camera position according to where the page is scrolled and renders, also renders the clicking effects on the car
+function animate(){
     let changeFactor = 1 - introCanvas.canvas.getBoundingClientRect().bottom/window.innerHeight; //How much offset for the camera
     if(changeFactor > 1) changeFactor = 1;
     let pos = [-2 + changeFactor*2, 2 , 2 - changeFactor*0.25];
     camera.position.set(pos[0],pos[1],pos[2]);
     camera.lookAt( 0, 0, 0 );
 
+    pickHelper.pick(pickPosition, scene, camera);
     renderer.render(scene,camera);
 
     if( Date.now() - lastScrolling < 100){ //100 ms yet since the last scrolling event?
-        requestAnimationFrame(animateScroll); //not yet. stay in the loop
+        requestAnimationFrame(animate); //not yet. stay in the loop
     }
     else{ //already stopped for 100ms. stopping the animation loop.
         scrolling = false;

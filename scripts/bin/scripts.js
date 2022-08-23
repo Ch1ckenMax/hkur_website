@@ -1,4 +1,5 @@
 /******/ (() => { // webpackBootstrap
+/******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
 /***/ "./car_animation.ts":
@@ -7,12 +8,12 @@
   \**************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
+/* harmony import */ var three__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
 /* harmony import */ var three_examples_jsm_loaders_GLTFLoader_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three/examples/jsm/loaders/GLTFLoader.js */ "./node_modules/three/examples/jsm/loaders/GLTFLoader.js");
 /* harmony import */ var three_examples_jsm_loaders_DRACOLoader_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! three/examples/jsm/loaders/DRACOLoader.js */ "./node_modules/three/examples/jsm/loaders/DRACOLoader.js");
 /* harmony import */ var _intersectionObservation__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./intersectionObservation */ "./intersectionObservation.ts");
+/* harmony import */ var _division_descriptions__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./division_descriptions */ "./division_descriptions.ts");
 var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
@@ -28,6 +29,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+
 
 
 
@@ -61,15 +63,15 @@ var introCanvas = new CanvasForAnimation("intro");
 var introCarCanvas = new CarCanvas("intro_car");
 var divisionCanvas = new CanvasForAnimation("division");
 var divisionCarCanvas = new CarCanvas("division_car");
-var renderer = new three__WEBPACK_IMPORTED_MODULE_3__.WebGLRenderer({ alpha: true, antialias: true });
+var renderer = new three__WEBPACK_IMPORTED_MODULE_4__.WebGLRenderer({ alpha: true, antialias: true });
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(CarCanvas.getWidth(), CarCanvas.getHeight());
 introCarCanvas.canvas.appendChild(renderer.domElement);
 divisionCarCanvas.canvas.appendChild(renderer.domElement);
-var camera = new three__WEBPACK_IMPORTED_MODULE_3__.PerspectiveCamera(50, CarCanvas.getWidth() / CarCanvas.getHeight(), 0.1, 200000);
+var camera = new three__WEBPACK_IMPORTED_MODULE_4__.PerspectiveCamera(50, CarCanvas.getWidth() / CarCanvas.getHeight(), 0.1, 200000);
 camera.position.set(-2, 2, 2);
 camera.lookAt(0, 0, 0);
-var scene = new three__WEBPACK_IMPORTED_MODULE_3__.Scene();
+var scene = new three__WEBPACK_IMPORTED_MODULE_4__.Scene();
 var modelLoader = new three_examples_jsm_loaders_GLTFLoader_js__WEBPACK_IMPORTED_MODULE_0__.GLTFLoader();
 var dracoLoader = new three_examples_jsm_loaders_DRACOLoader_js__WEBPACK_IMPORTED_MODULE_1__.DRACOLoader();
 dracoLoader.setDecoderPath('../scripts/node_modules/three/examples/js/libs/draco/');
@@ -79,14 +81,14 @@ modelLoader.load("../images/hkur_01_compressed.glb", function (gltf) {
     gltf.scene.scale.set(1.15, 1.15, 1.15);
     gltf.scene.position.set(1.15, 0, 0);
     console.log(gltf.scene);
-    gltf.scene.rotateOnAxis(new three__WEBPACK_IMPORTED_MODULE_3__.Vector3(1, 0, 0), -Math.PI / 2);
+    gltf.scene.rotateOnAxis(new three__WEBPACK_IMPORTED_MODULE_4__.Vector3(1, 0, 0), -Math.PI / 2);
     scene.add(gltf.scene);
-    animateScroll();
+    animate();
 }, undefined, function (error) {
     console.error(error);
 });
-var ambientLight = new three__WEBPACK_IMPORTED_MODULE_3__.AmbientLight(0x404040, 1);
-var light = new three__WEBPACK_IMPORTED_MODULE_3__.PointLight(0xffffff, 1, 16);
+var ambientLight = new three__WEBPACK_IMPORTED_MODULE_4__.AmbientLight(0x404040, 1);
+var light = new three__WEBPACK_IMPORTED_MODULE_4__.PointLight(0xffffff, 1, 16);
 light.position.set(-1.5, 1, 1);
 scene.add(ambientLight);
 scene.add(light);
@@ -114,19 +116,148 @@ function renderOnScroll() {
     lastScrolling = Date.now();
     if (scrolling)
         return;
-    requestAnimationFrame(animateScroll);
+    requestAnimationFrame(animate);
     scrolling = true;
 }
-function animateScroll() {
+var PickHelper = (function () {
+    function PickHelper() {
+        this.raycaster = new three__WEBPACK_IMPORTED_MODULE_4__.Raycaster();
+        this.pickedDivision = null;
+        this.pickedDivisionMaterial = {};
+    }
+    PickHelper.prototype.pick = function (normalizedPosition, scene, camera) {
+        if (this.pickedDivision != null) {
+            this.restoreDivisionMaterial();
+            this.pickedDivision = null;
+            this.pickedDivisionMaterial = {};
+        }
+        this.raycaster.setFromCamera(normalizedPosition, camera);
+        var intersectedObjects = this.raycaster.intersectObjects(scene.children);
+        if (intersectedObjects.length) {
+            this.pickedDivision = PickHelper.partMapDivision[PickHelper.getCarPart(intersectedObjects[0].object).name];
+            this.paintDivisionEmissive(0x006600);
+        }
+    };
+    PickHelper.getCarPart = function (component) {
+        while (component.parent.name != "HKUR01") {
+            component = component.parent;
+        }
+        return component;
+    };
+    PickHelper.prototype.paintDivisionEmissive = function (emissiveColor) {
+        var _this = this;
+        PickHelper.divisionMapPart[this.pickedDivision].forEach(function (element) {
+            _this.changeEmissiveOfCarPart(scene.getObjectByName(element), emissiveColor);
+        });
+    };
+    PickHelper.prototype.changeEmissiveOfCarPart = function (carPart, emissiveColor) {
+        var _this = this;
+        carPart.children.forEach(function (element) {
+            if (element.isMesh) {
+                _this.pickedDivisionMaterial[element.name] = element.material;
+                element.material = element.material.clone();
+                element.material.emissive.setHex(emissiveColor);
+            }
+            else {
+                _this.changeEmissiveOfCarPart(element, emissiveColor);
+            }
+        });
+    };
+    PickHelper.prototype.restoreDivisionMaterial = function () {
+        var _this = this;
+        PickHelper.divisionMapPart[this.pickedDivision].forEach(function (element) {
+            _this.restoreCarPartMaterial(scene.getObjectByName(element));
+        });
+    };
+    PickHelper.prototype.restoreCarPartMaterial = function (carPart) {
+        var _this = this;
+        carPart.children.forEach(function (element) {
+            if (element.isMesh) {
+                element.material = _this.pickedDivisionMaterial[element.name];
+            }
+            else {
+                _this.restoreCarPartMaterial(element);
+            }
+        });
+    };
+    PickHelper.partMapDivision = {
+        "accumulator_<1>": "power",
+        "aerodynamics_<1>": "aero",
+        "chassis_<1>": "chassis",
+        "electronics_<1>": "elec",
+        "FL_suspension_<1>": "sus",
+        "FR_suspension_<1>": "sus",
+        "RL_suspension_<1>": "sus",
+        "RR_suspension_<1>": "sus",
+        "steering_<1>": "input",
+        "pedal_box_<1>": "input",
+        "powertrain_<1>": "power",
+        "sim_<1>": ""
+    };
+    PickHelper.divisionMapPart = {
+        "power": ["accumulator_<1>", "powertrain_<1>"],
+        "aero": ["aerodynamics_<1>"],
+        "chassis": ["chassis_<1>"],
+        "elec": ["electronics_<1>"],
+        "sus": ["FL_suspension_<1>", "FR_suspension_<1>", "RL_suspension_<1>", "RR_suspension_<1>"],
+        "input": ["steering_<1>", "pedal_box_<1>"],
+        "sim": [""],
+    };
+    return PickHelper;
+}());
+var pickHelper = new PickHelper();
+var pickPosition = { x: 0, y: 0 };
+clearPickPosition();
+function getCanvasRelativePosition(event) {
+    var rect;
+    if (introCarCanvas.inViewport()) {
+        rect = introCarCanvas.canvas.getBoundingClientRect();
+    }
+    else if (divisionCarCanvas.inViewport()) {
+        rect = divisionCarCanvas.canvas.getBoundingClientRect();
+    }
+    return {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top,
+    };
+}
+function setPickPosition(event) {
+    var pos = getCanvasRelativePosition(event);
+    pickPosition.x = (pos.x / CarCanvas.getWidth()) * 2 - 1;
+    pickPosition.y = (pos.y / CarCanvas.getHeight()) * -2 + 1;
+    if (!scrolling) {
+        requestAnimationFrame(animate);
+    }
+}
+function clearPickPosition() {
+    pickPosition.x = -100000;
+    pickPosition.y = -100000;
+}
+function changeDivisionBasedOnClick() {
+    if (pickHelper.pickedDivision != null) {
+        console.log("Picked " + pickHelper.pickedDivision);
+        (0,_division_descriptions__WEBPACK_IMPORTED_MODULE_3__.divisionDescriptionChange)(pickHelper.pickedDivision);
+    }
+}
+introCarCanvas.canvas.addEventListener('mousemove', setPickPosition);
+introCarCanvas.canvas.addEventListener('mouseout', clearPickPosition);
+introCarCanvas.canvas.addEventListener('mouseleave', clearPickPosition);
+introCarCanvas.canvas.addEventListener('click', changeDivisionBasedOnClick);
+divisionCarCanvas.canvas.addEventListener('mousemove', setPickPosition);
+divisionCarCanvas.canvas.addEventListener('mouseout', clearPickPosition);
+divisionCarCanvas.canvas.addEventListener('mouseleave', clearPickPosition);
+divisionCarCanvas.canvas.addEventListener('click', changeDivisionBasedOnClick);
+function animate() {
     var changeFactor = 1 - introCanvas.canvas.getBoundingClientRect().bottom / window.innerHeight;
     if (changeFactor > 1)
         changeFactor = 1;
     var pos = [-2 + changeFactor * 2, 2, 2 - changeFactor * 0.25];
     camera.position.set(pos[0], pos[1], pos[2]);
     camera.lookAt(0, 0, 0);
+    pickHelper.pick(pickPosition, scene, camera);
     renderer.render(scene, camera);
     if (Date.now() - lastScrolling < 100) {
-        requestAnimationFrame(animateScroll);
+        requestAnimationFrame(animate);
     }
     else {
         scrolling = false;
@@ -141,9 +272,14 @@ function animateScroll() {
 /*!**********************************!*\
   !*** ./division_descriptions.ts ***!
   \**********************************/
-/***/ (function() {
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "divisionDescription": () => (/* binding */ divisionDescription),
+/* harmony export */   "divisionDescriptionChange": () => (/* binding */ divisionDescriptionChange)
+/* harmony export */ });
+var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -152,7 +288,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __generator = (this && this.__generator) || function (thisArg, body) {
+var __generator = (undefined && undefined.__generator) || function (thisArg, body) {
     var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
     return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
@@ -182,7 +318,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var divisionDescription = {
     "chassis": ["Chassis", "Chassis Division’s task is to develop the main frame for the vehicle, you can say the frame is the bracket holding together every component. The current design has chosen to use a spaceframe design. In the future we are actively looking into developing a full carbon fiber monocoque chassis."],
     "sus": ["Suspension", "Suspension Division is responsible for developing a system to maintain tire contact with the ground. The suspension also serve as the device to tune a vehicle’s handling characteristics. Extremely important to inspire driver’s confident."],
-    "aero": ["Aero & Bodywork", "The Aero Division not only makes our car looks cool, they also make it fast ! Developing the whole bodywork it makes our car slippery in the air and generate down force to help us corner faster."],
+    "aero": ["Aero & Bodywork", "The Aero Division not only makes our car looks cool, they also make it fast! Developing the whole bodywork it makes our car slippery in the air and generate down force to help us corner faster."],
     "power": ["Powertrain", "These guys design the powerhouse  of the vehicle, propelling us to our destination. Their importance is self-explanatory."],
     "input": ["Driving Input", "This Division develops the braking system, and steering system for our car. They are responsible to make sure these vital functions of the car works in harmony with other important assembly."],
     "elec": ["Electrical", "A car without electrical system is like a primitive human being. The electrical division monitor and controls the complex systems on-board the vehicle."],
@@ -231,7 +367,6 @@ for (var i = 0; i < divisionButtons.length; i++) {
   \************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "IntersectionObservation": () => (/* binding */ IntersectionObservation)
@@ -322,7 +457,6 @@ var divDescriptionObserver = divDescription.generateObservation(function (entry)
   \**************************************************/
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "ACESFilmicToneMapping": () => (/* binding */ ACESFilmicToneMapping),
@@ -50197,7 +50331,6 @@ if ( typeof window !== 'undefined' ) {
   \****************************************************************/
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "DRACOLoader": () => (/* binding */ DRACOLoader)
@@ -50795,7 +50928,6 @@ function DRACOWorker() {
   \***************************************************************/
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "GLTFLoader": () => (/* binding */ GLTFLoader)
@@ -55305,25 +55437,13 @@ function toTrianglesDrawMode( geometry, drawMode ) {
 /******/ 		};
 /******/ 	
 /******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
 /******/ 	
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
 /******/ 	
 /************************************************************************/
-/******/ 	/* webpack/runtime/compat get default export */
-/******/ 	(() => {
-/******/ 		// getDefaultExport function for compatibility with non-harmony modules
-/******/ 		__webpack_require__.n = (module) => {
-/******/ 			var getter = module && module.__esModule ?
-/******/ 				() => (module['default']) :
-/******/ 				() => (module);
-/******/ 			__webpack_require__.d(getter, { a: getter });
-/******/ 			return getter;
-/******/ 		};
-/******/ 	})();
-/******/ 	
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	(() => {
 /******/ 		// define getter functions for harmony exports
@@ -55354,15 +55474,13 @@ function toTrianglesDrawMode( geometry, drawMode ) {
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
-"use strict";
 /*!******************!*\
   !*** ./entry.js ***!
   \******************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _division_descriptions_ts__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./division_descriptions.ts */ "./division_descriptions.ts");
-/* harmony import */ var _division_descriptions_ts__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_division_descriptions_ts__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _intersectionObservation_ts__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./intersectionObservation.ts */ "./intersectionObservation.ts");
 /* harmony import */ var _car_animation_ts__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./car_animation.ts */ "./car_animation.ts");
 
