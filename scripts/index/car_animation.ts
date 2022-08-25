@@ -1,8 +1,9 @@
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/examples/jsm/loaders/DRACOLoader.js';
-import {IntersectionObservation} from './intersectionObservation';
-import {divisionDescription, divisionDescriptionChange} from './division_descriptions';
+import {IntersectionObservationHelper} from '../src/intersection_observation';
+import {divisionDescriptionChange} from './division_descriptions';
+
 //Canvas container
 class CanvasForAnimation{
     canvas: HTMLElement;
@@ -27,7 +28,7 @@ class CarCanvas extends CanvasForAnimation{
     }
     
     static getHeight(): number{
-        return (window.innerHeight - document.getElementById('intro_description').scrollHeight - 96);
+        return (window.innerHeight - document.getElementById('intro_description')!.scrollHeight - 96);
     }
 }
 
@@ -88,7 +89,7 @@ function canvasResize(): void{
 }
 
 //domElement manipulation on scroll
-let canvasBehaviour = new IntersectionObservation('#intro',0);
+let canvasBehaviour = new IntersectionObservationHelper('#intro',0);
 let canvasBehaviourBehaviourObserver = canvasBehaviour.generateObservation((entry:any) => {
     introCarCanvas.canvas.appendChild(renderer.domElement);
     introCarCanvas.canvas.classList.add('fixed');
@@ -99,8 +100,7 @@ let canvasBehaviourBehaviourObserver = canvasBehaviour.generateObservation((entr
 
 //Animate smoothly by activating requestAnimationFrame loop when scrolling starts and deactivating it when no scrolling has been done for 100ms
 let scrolling: boolean = false;
-let lastScrolling: number = null;
-
+let lastScrolling: number|null = null;
 window.addEventListener('scroll',renderOnScroll,false);
 function renderOnScroll(){
     if(!(introCanvas.inViewport() && divisionCanvas.inViewport())) return; //Not in scrolling area. Not rendering.
@@ -113,7 +113,7 @@ function renderOnScroll(){
 //Helper class for picking car parts
 class PickHelper {
     raycaster: THREE.Raycaster;
-    pickedDivision: string;
+    pickedDivision: string|null;
     pickedDivisionMaterial: {[key: string]: any};
     static partMapDivision:{[key: string]: string} = { //Maps the part's name property to each divisions
         "accumulator_<1>":"power",
@@ -162,16 +162,16 @@ class PickHelper {
 
     //Get the reference to the car part that contains the component from the argument
     static getCarPart(component: THREE.Object3D): THREE.Object3D{
-        while(component.parent.name != "HKUR01"){
-            component = component.parent;
+        while(component.parent!.name != "HKUR01"){
+            component = component.parent!;
         }
         return component;
     }
 
     //Paint all the car part belong to the picked division to the emissive color of the argument
     paintDivisionEmissive(emissiveColor: number): void{
-        PickHelper.divisionMapPart[this.pickedDivision].forEach((element:string) => {
-            this.changeEmissiveOfCarPart(scene.getObjectByName(element), emissiveColor);
+        PickHelper.divisionMapPart[this.pickedDivision!].forEach((element:string) => {
+            this.changeEmissiveOfCarPart(scene.getObjectByName(element)!, emissiveColor);
         });
     }
 
@@ -191,8 +191,8 @@ class PickHelper {
 
     //Restore all the car part belong to the picked division to the original material
     restoreDivisionMaterial(): void{
-        PickHelper.divisionMapPart[this.pickedDivision].forEach((element:string) => {
-            this.restoreCarPartMaterial(scene.getObjectByName(element));
+        PickHelper.divisionMapPart[this.pickedDivision!].forEach((element:string) => {
+            this.restoreCarPartMaterial(scene.getObjectByName(element)!);
         });
     }
 
@@ -209,7 +209,6 @@ class PickHelper {
     }
 
   }
-
 const pickHelper = new PickHelper();
 
 //Cursor position
@@ -217,7 +216,7 @@ const pickPosition = {x: 0, y: 0};
 clearPickPosition();
 
 //Relative position of the cursor to the canvas
-function getCanvasRelativePosition(event: MouseEvent) {
+function getCanvasRelativePosition(event: MouseEvent): {x:number,y:number}|null{
     let rect: DOMRect;
     if(introCarCanvas.inViewport()){
         rect = introCarCanvas.canvas.getBoundingClientRect();
@@ -225,6 +224,7 @@ function getCanvasRelativePosition(event: MouseEvent) {
     else if(divisionCarCanvas.inViewport()){
         rect = divisionCarCanvas.canvas.getBoundingClientRect();
     }
+    else return null; //error
     return {
       x: event.clientX - rect.left,
       y: event.clientY - rect.top,
@@ -275,7 +275,7 @@ function animate(){
     pickHelper.pick(pickPosition, scene, camera);
     renderer.render(scene,camera);
 
-    if( Date.now() - lastScrolling < 100){ //100 ms yet since the last scrolling event?
+    if( Date.now() - lastScrolling! < 100){ //100 ms yet since the last scrolling event?
         requestAnimationFrame(animate); //not yet. stay in the loop
     }
     else{ //already stopped for 100ms. stopping the animation loop.

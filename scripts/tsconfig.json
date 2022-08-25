@@ -10,6 +10,6 @@
       "target": "es5",
       "outDir": "./bin/",
     },
-    "include": ["./*.ts"]
+    "include": ["./*.ts", "index/car_animation.ts", "global/navbar.ts", "index/division_descriptions.ts", "index/text_fade.ts", "src/intersection_observation.ts"]
     
 }

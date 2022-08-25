@@ -1,8 +1,11 @@
 const path = require('path');
 
 module.exports = {
-  entry: './entry.js',
-  mode: "development",
+  entry: {
+    global: './entry_point/global.js',
+    index: './entry_point/index.js'
+  },
+  mode: "production",
   devtool: false,
   module: {
     rules: [
@@ -17,7 +20,7 @@ module.exports = {
     extensions: ['.tsx', '.ts', '.js'],
   },
   output: {
-    filename: 'scripts.js',
+    filename: '[name].js',
     path: path.resolve(__dirname, 'bin'),
   },
 };
