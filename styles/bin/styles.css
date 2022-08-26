@@ -630,8 +630,8 @@ video {
   margin-bottom: 1.75rem;
 }
 
-.mt-\[156px\] {
-  margin-top: 156px;
+.mt-\[57px\] {
+  margin-top: 57px;
 }
 
 .mt-\[96-px\] {
@@ -784,9 +784,19 @@ video {
   line-height: 1.75rem;
 }
 
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
 .text-2xl {
   font-size: 1.5rem;
   line-height: 2rem;
+}
+
+.text-base {
+  font-size: 1rem;
+  line-height: 1.5rem;
 }
 
 .font-bold {
@@ -842,6 +852,10 @@ video {
     visibility: visible;
   }
 
+  .md\:mt-\[156px\] {
+    margin-top: 156px;
+  }
+
   .md\:hidden {
     display: none;
   }
@@ -866,6 +880,11 @@ video {
   .md\:text-3xl {
     font-size: 1.875rem;
     line-height: 2.25rem;
+  }
+
+  .md\:text-base {
+    font-size: 1rem;
+    line-height: 1.5rem;
   }
 
   .md\:text-4xl {

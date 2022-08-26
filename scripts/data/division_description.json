@@ -1,5 +1,5 @@
 {
-    "default" : ["Check out our HKUR-01 race car BRUH","Click the car components to see the introduction of our each divisions."],
+    "default" : ["Check out our HKUR-01 race car","Click the car components to see the introduction of our each divisions."],
     "chassis" : ["Chassis","Chassis Division’s task is to develop the main frame for the vehicle, you can say the frame is the bracket holding together every component. The current design has chosen to use a spaceframe design. In the future we are actively looking into developing a full carbon fiber monocoque chassis."],
     "sus" : ["Suspension","Suspension Division is responsible for developing a system to maintain tire contact with the ground. The suspension also serve as the device to tune a vehicle’s handling characteristics. Extremely important to inspire driver’s confident."],
     "aero" : ["Aero & Bodywork","The Aero Division not only makes our car looks cool, they also make it fast! Developing the whole bodywork it makes our car slippery in the air and generate down force to help us corner faster."],

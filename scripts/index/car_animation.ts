@@ -28,7 +28,10 @@ class CarCanvas extends CanvasForAnimation{
     }
     
     static getHeight(): number{
-        return (window.innerHeight - document.getElementById('intro_description')!.scrollHeight - 96);
+        if(window.innerWidth > 768) //responsive design
+            return (window.innerHeight - document.getElementById('intro_description')!.scrollHeight - 96);
+        else
+            return (screen.height/2 - 57);
     }
 }
 
@@ -36,6 +39,7 @@ let introCanvas = new CanvasForAnimation("intro");
 let introCarCanvas = new CarCanvas("intro_car");
 let divisionCanvas = new CanvasForAnimation("division");
 let divisionCarCanvas = new CarCanvas("division_car");
+let carModel: THREE.Group;
 
 //renderer
 const renderer = new THREE.WebGLRenderer(
@@ -61,8 +65,12 @@ dracoLoader.setDecoderPath('../scripts/node_modules/three/examples/js/libs/draco
 modelLoader.setDRACOLoader(dracoLoader);
 modelLoader.load("../images/hkur_01_compressed.glb",function(gltf){
     document.getElementById("loading_screen")!.classList.add("hidden"); //removes loading screen
+    carModel = gltf.scene;
     gltf.scene.scale.set(1.15,1.15,1.15);
-    gltf.scene.position.set(1.15,0,0);
+    if(window.innerWidth > 768) //responsive design
+        gltf.scene.position.set(1.15,0,0);
+    else
+        gltf.scene.position.set(1.3,0,0);
     console.log(gltf.scene);
     gltf.scene.rotateOnAxis(new THREE.Vector3(1,0,0), -Math.PI/2);
     scene.add(gltf.scene);
@@ -85,6 +93,10 @@ function canvasResize(): void{
     camera.aspect = CarCanvas.getWidth()/CarCanvas.getHeight();
     camera.updateProjectionMatrix();
     renderer.setSize(CarCanvas.getWidth(), CarCanvas.getHeight());
+    if(window.innerWidth > 768) //responsive design
+        carModel.position.set(1.15,0,0);
+    else
+        carModel.position.set(1.3,0,0);
     renderer.render(scene,camera);
 }
 
@@ -268,7 +280,11 @@ divisionCarCanvas.canvas.addEventListener('click', changeDivisionBasedOnClick);
 function animate(){
     let changeFactor = 1 - introCanvas.canvas.getBoundingClientRect().bottom/window.innerHeight; //How much offset for the camera
     if(changeFactor > 1) changeFactor = 1;
-    let pos = [-2 + changeFactor*2, 2 , 2 - changeFactor*0.25];
+    let pos: number[];
+    if(window.innerWidth > 768) //Responsive design
+        pos = [-2 + changeFactor*2, 2 , 2 - changeFactor*0.25];
+    else
+        pos = [-2 + changeFactor*2, 2 + changeFactor * 1, 2 - changeFactor*0.25]
     camera.position.set(pos[0],pos[1],pos[2]);
     camera.lookAt( 0, 0, 0 );
 

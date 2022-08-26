@@ -1,4 +1,5 @@
 import {IntersectionObservationHelper} from '../src/intersection_observation';
+//Not used at the moment. Only used when position of navbar is fixed.
 
 //nav bar opacity upon scrolling
 let navBar = document.getElementsByTagName('nav')[0];
